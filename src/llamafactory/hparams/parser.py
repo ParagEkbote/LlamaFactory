@@ -100,6 +100,44 @@ def _parse_args(
     return tuple(parsed_args)
 
 
+def _verify_trackio_args(training_args: "TrainingArguments") -> None:
+    """Validates Trackio-specific arguments.
+
+    Args:
+        training_args: TrainingArguments instance (not a dictionary)
+    """
+    if not hasattr(training_args, "report_to") or not training_args.report_to:
+        return
+
+    report_to = training_args.report_to
+    if isinstance(report_to, str):
+        report_to = [report_to]
+
+    if "trackio" not in report_to:
+        return
+
+    # Validate trackio_space_id format
+    if hasattr(training_args, "trackio_space_id") and training_args.trackio_space_id:
+        space_id = training_args.trackio_space_id
+        if space_id != "trackio" and "/" not in space_id:
+            logger.warning(
+                f"trackio_space_id '{space_id}' should typically be in format 'org/space' "
+                "for Hugging Face Spaces deployment."
+            )
+
+    # Inform about project name
+    if hasattr(training_args, "project"):
+        if training_args.project == "huggingface":
+            logger.info(
+                "Using default project name 'huggingface'. "
+                "Consider setting a custom project name with --project for better organization."
+            )
+
+    # Validate hub_private_repo is used correctly
+    if hasattr(training_args, "hub_private_repo") and training_args.hub_private_repo:
+        logger.info("Repository will be created as private on Hugging Face Hub.")
+
+
 def _set_transformers_logging() -> None:
     if os.getenv("LLAMAFACTORY_VERBOSITY", "INFO") in ["DEBUG", "INFO"]:
         transformers.utils.logging.set_verbosity_info()
@@ -278,7 +316,7 @@ def get_train_args(args: dict[str, Any] | list[str] | None = None) -> _TRAIN_CLS
         if finetuning_args.reward_model_type == "lora" and model_args.use_unsloth:
             raise ValueError("Unsloth does not support lora reward model.")
 
-        if training_args.report_to and training_args.report_to[0] not in ["wandb", "tensorboard"]:
+        if training_args.report_to and training_args.report_to[0] not in ["wandb", "tensorboard", "trackio"]:
             raise ValueError("PPO only accepts wandb or tensorboard logger.")
 
     if not model_args.use_kt and training_args.parallel_mode == ParallelMode.NOT_DISTRIBUTED:
@@ -352,6 +390,7 @@ def get_train_args(args: dict[str, Any] | list[str] | None = None) -> _TRAIN_CLS
     _set_env_vars()
     _verify_model_args(model_args, data_args, finetuning_args)
     _check_extra_dependencies(model_args, finetuning_args, training_args)
+    _verify_trackio_args(training_args)
 
     if not finetuning_args.use_mca and training_args.fp8_enable_fsdp_float8_all_gather and not training_args.fp8:
         logger.warning_rank0("fp8_enable_fsdp_float8_all_gather requires fp8=True. Setting fp8=True.")
