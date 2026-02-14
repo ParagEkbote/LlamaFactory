@@ -96,10 +96,6 @@ class TrainingArguments(Fp8Arguments, RayArguments, BaseTrainingArguments):
         metadata={"help": "deprecated"},
     )
 
-    def __post_init__(self):
-        RayArguments.__post_init__(self)
-        BaseTrainingArguments.__post_init__(self)
-
     project: Optional[str] = field(
         default=None,
         metadata={"help": "The name of the project for experiment tracking (e.g., wandb or trackio)."},
@@ -109,3 +105,7 @@ class TrainingArguments(Fp8Arguments, RayArguments, BaseTrainingArguments):
         default=None,
         metadata={"help": "The Hugging Face Space ID for Trackio deployment."},
     )
+
+    def __post_init__(self):
+        RayArguments.__post_init__(self)
+        BaseTrainingArguments.__post_init__(self)
