@@ -316,7 +316,7 @@ def get_train_args(args: dict[str, Any] | list[str] | None = None) -> _TRAIN_CLS
         if finetuning_args.reward_model_type == "lora" and model_args.use_unsloth:
             raise ValueError("Unsloth does not support lora reward model.")
 
-        if training_args.report_to and training_args.report_to[0] not in ["wandb", "tensorboard", "trackio"]:
+        if training_args.report_to and any(logger not in ("wandb", "tensorboard", "trackio", "none") for logger in training_args.report_to):
             raise ValueError("PPO only accepts wandb, tensorboard, or trackio logger.")
 
     if not model_args.use_kt and training_args.parallel_mode == ParallelMode.NOT_DISTRIBUTED:
