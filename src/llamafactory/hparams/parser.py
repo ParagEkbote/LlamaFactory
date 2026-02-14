@@ -106,7 +106,7 @@ def _verify_trackio_args(training_args: "TrainingArguments") -> None:
     Args:
         training_args: TrainingArguments instance (not a dictionary)
     """
-    if not hasattr(training_args, "report_to") or not training_args.report_to:
+    if not training_args.report_to:
         return
 
     report_to = training_args.report_to
@@ -117,7 +117,7 @@ def _verify_trackio_args(training_args: "TrainingArguments") -> None:
         return
 
     # Validate trackio_space_id format
-    if hasattr(training_args, "trackio_space_id") and training_args.trackio_space_id:
+    if training_args.trackio_space_id:
         space_id = training_args.trackio_space_id
         if space_id != "trackio" and "/" not in space_id:
             logger.warning(
@@ -125,8 +125,7 @@ def _verify_trackio_args(training_args: "TrainingArguments") -> None:
                 "for Hugging Face Spaces deployment."
             )
 
-    # Inform about project name
-    if hasattr(training_args, "project"):
+        # Inform about project name
         if training_args.project == "huggingface":
             logger.info(
                 "Using default project name 'huggingface'. "
@@ -134,7 +133,7 @@ def _verify_trackio_args(training_args: "TrainingArguments") -> None:
             )
 
     # Validate hub_private_repo is used correctly
-    if hasattr(training_args, "hub_private_repo") and training_args.hub_private_repo:
+    if training_args.hub_private_repo:
         logger.info("Repository will be created as private on Hugging Face Hub.")
 
 
@@ -316,7 +315,9 @@ def get_train_args(args: dict[str, Any] | list[str] | None = None) -> _TRAIN_CLS
         if finetuning_args.reward_model_type == "lora" and model_args.use_unsloth:
             raise ValueError("Unsloth does not support lora reward model.")
 
-        if training_args.report_to and any(logger not in ("wandb", "tensorboard", "trackio", "none") for logger in training_args.report_to):
+        if training_args.report_to and any(
+            logger not in ("wandb", "tensorboard", "trackio", "none") for logger in training_args.report_to
+        ):
             raise ValueError("PPO only accepts wandb, tensorboard, or trackio logger.")
 
     if not model_args.use_kt and training_args.parallel_mode == ParallelMode.NOT_DISTRIBUTED:
