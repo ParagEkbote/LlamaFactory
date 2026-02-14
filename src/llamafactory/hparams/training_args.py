@@ -14,6 +14,7 @@
 
 import json
 from dataclasses import dataclass, field
+from typing import Optional
 
 from transformers import Seq2SeqTrainingArguments
 from transformers.training_args import _convert_str_dict
@@ -98,3 +99,13 @@ class TrainingArguments(Fp8Arguments, RayArguments, BaseTrainingArguments):
     def __post_init__(self):
         RayArguments.__post_init__(self)
         BaseTrainingArguments.__post_init__(self)
+
+    project: Optional[str] = field(
+        default=None,
+        metadata={"help": "The name of the project for experiment tracking (e.g., wandb or trackio)."},
+    )
+
+    trackio_space_id: Optional[str] = field(
+        default=None,
+        metadata={"help": "The Hugging Face Space ID for Trackio deployment."},
+    )
