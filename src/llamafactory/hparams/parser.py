@@ -317,7 +317,7 @@ def get_train_args(args: dict[str, Any] | list[str] | None = None) -> _TRAIN_CLS
             raise ValueError("Unsloth does not support lora reward model.")
 
         if training_args.report_to and training_args.report_to[0] not in ["wandb", "tensorboard", "trackio"]:
-            raise ValueError("PPO only accepts wandb or tensorboard logger.")
+            raise ValueError("PPO only accepts wandb, tensorboard, or trackio logger.")
 
     if not model_args.use_kt and training_args.parallel_mode == ParallelMode.NOT_DISTRIBUTED:
         raise ValueError("Please launch distributed training with `llamafactory-cli` or `torchrun`.")
